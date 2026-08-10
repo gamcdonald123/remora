@@ -17,6 +17,7 @@ Rails.application.routes.draw do
       post :stop
       post :restart
       get :logs, controller: "logs", action: :show, as: :logs
+      get :follow, controller: "logs", action: :follow, as: :follow
     end
   end
 end

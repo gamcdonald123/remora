@@ -27,6 +27,16 @@ module Remora
       assert_equal "", LogDemux.call("")
     end
 
+    test "streamer reassembles frames split across arbitrary chunk boundaries" do
+      whole = frame(STDOUT_T, "alpha\n") + frame(STDERR_T, "beta\n") + frame(STDOUT_T, "gamma\n")
+      streamer = LogDemux::Streamer.new
+
+      output = +""
+      whole.bytes.each_slice(5) { |slice| output << streamer.push(slice.pack("C*")) }
+
+      assert_equal "alpha\nbeta\ngamma\n", output
+    end
+
     private
 
     def frame(type, payload)

@@ -14,10 +14,10 @@ Details, acceptance criteria, and verification steps: [plan.md](plan.md).
 - [x] **Checkpoint 2:** two-browser live updates from terminal docker commands
 
 ## Phase 3 — Logs
-- [ ] 6. Logs drawer, static tail + demuxer (TTY & non-TTY) — M
-- [ ] 7. Client-side search + error highlighting — S
-- [ ] 8. Follow mode (SSE proxy, thread budget) — M
-- [ ] **Checkpoint 3:** full log UX on real containers
+- [x] 6. Logs drawer, static tail + demuxer (TTY & non-TTY) — M
+- [x] 7. Client-side search + error highlighting — S
+- [x] 8. Follow mode (SSE proxy, thread budget) — M
+- [x] **Checkpoint 3:** full log UX on real containers
 
 ## Phase 4 — Uptime
 - [ ] 9. `events` table + recorder + 30d prune — S

@@ -2,6 +2,9 @@ module Remora
   # Thin client for the Docker Engine API over the local unix socket.
   class Docker
     class Error < StandardError; end
+    # Raised on read timeouts during follow streams — callers ping the client
+    # (proving it's still there) and resume from the last seen timestamp.
+    class TimeoutError < Error; end
 
     DEFAULT_SOCKET = "/var/run/docker.sock".freeze
 
@@ -53,6 +56,29 @@ module Remora
       ).body
       raw = tty ? body : LogDemux.call(body)
       raw.force_encoding(Encoding::UTF_8).scrub
+    end
+
+    # Follows the log stream, yielding demuxed text as it arrives. Always
+    # requests engine timestamps so callers can track a resume position.
+    def stream_logs(id, since:, read_timeout: 15, &block)
+      tty = inspect_container(id).dig("Config", "Tty")
+      demuxer = tty ? nil : LogDemux::Streamer.new
+      streamer = lambda do |chunk, _remaining, _total|
+        text = demuxer ? demuxer.push(chunk) : chunk
+        block.call(text) unless text.empty?
+      end
+
+      connection.request(
+        method: :get, path: "/containers/#{id}/logs",
+        query: { follow: 1, stdout: 1, stderr: 1, tail: 0, timestamps: 1, since: since },
+        response_block: streamer,
+        read_timeout: read_timeout
+      )
+      true
+    rescue Excon::Errors::Timeout => e
+      raise TimeoutError, e.message
+    rescue Excon::Error => e
+      raise Error, "Docker socket #{@socket}: #{e.message}"
     end
 
     def start_container(id) = post("/containers/#{id}/start")

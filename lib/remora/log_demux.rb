@@ -17,5 +17,30 @@ module Remora
       # A truncated trailing frame contributes whatever payload arrived.
       output
     end
+
+    # Stateful variant for follow streams, where frames arrive split across
+    # arbitrary chunk boundaries. push returns whatever complete payloads the
+    # chunk finished off; partial frames wait in the buffer.
+    class Streamer
+      def initialize
+        @buffer = +"".b
+      end
+
+      def push(chunk)
+        @buffer << chunk.b
+        output = +""
+        loop do
+          break if @buffer.bytesize < 8
+
+          type, length = @buffer.unpack("Cx3N")
+          break unless STREAM_TYPES.include?(type)
+          break if @buffer.bytesize < 8 + length
+
+          output << @buffer.byteslice(8, length)
+          @buffer = @buffer.byteslice(8 + length, @buffer.bytesize).to_s
+        end
+        output.force_encoding(Encoding::UTF_8).scrub
+      end
+    end
   end
 end

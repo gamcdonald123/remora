@@ -102,6 +102,35 @@ module Remora
       assert_equal [ [ "die", "aaa" ], [ "start", "bbb" ] ], seen
     end
 
+    test "stream_logs yields demuxed text chunks for a non-tty container" do
+      Excon.stub(
+        { method: :get, path: "/containers/abc/json" },
+        { status: 200, body: { "Config" => { "Tty" => false } }.to_json }
+      )
+      frame = [ 1, 0, 0, 0, 6 ].pack("CC3N") + "live!\n"
+      Excon.stub({ method: :get, path: "/containers/abc/logs" }) do |params|
+        params[:response_block].call(frame, nil, nil)
+        { status: 200, body: "" }
+      end
+
+      seen = +""
+      @client.stream_logs("abc", since: 0) { |text| seen << text }
+
+      assert_equal "live!\n", seen
+    end
+
+    test "stream_logs raises TimeoutError on read timeout so callers can ping and resume" do
+      Excon.stub(
+        { method: :get, path: "/containers/abc/json" },
+        { status: 200, body: { "Config" => { "Tty" => true } }.to_json }
+      )
+      Excon.stub({ method: :get, path: "/containers/abc/logs" }) do
+        raise Excon::Errors::Timeout.new("read timeout")
+      end
+
+      assert_raises(Remora::Docker::TimeoutError) { @client.stream_logs("abc", since: 0) { } }
+    end
+
     test "non-2xx responses raise Remora::Docker::Error with the engine message" do
       Excon.stub(
         { method: :get, path: "/containers/missing/json" },

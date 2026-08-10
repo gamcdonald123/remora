@@ -43,6 +43,25 @@ class LogsControllerTest < ActionDispatch::IntegrationTest
     assert_includes captured, "tail=4000"
   end
 
+  test "follow streams SSE events and finishes with a closed event" do
+    stub_inspect(tty: false)
+    line = "2026-08-10T22:00:00.000000000Z stream me <careful>\n"
+    frames = frame(1, line)
+    Excon.stub({ method: :get, path: "/containers/#{SHORT_ID}/logs" }) do |params|
+      params[:response_block].call(frames, nil, nil)
+      { status: 200, body: "" }
+    end
+
+    get follow_container_path(SHORT_ID)
+
+    assert_response :success
+    assert_equal "text/event-stream", response.headers["Content-Type"]
+    assert_match "data: <div class=\"log-line", response.body
+    assert_match "stream me &lt;careful&gt;", response.body
+    refute_match "2026-08-10T22:00:00", response.body
+    assert_match "event: closed", response.body
+  end
+
   private
 
   def frame(type, payload)
