@@ -122,6 +122,11 @@ main {
   color: var(--bad);
 }
 
+.badge-ts {
+  background: color-mix(in srgb, #6395f2 18%, transparent);
+  color: #4f7ee0;
+}
+
 .badge-exits {
   background: color-mix(in srgb, var(--warn) 15%, transparent);
   color: var(--warn);

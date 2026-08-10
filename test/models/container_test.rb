@@ -109,6 +109,51 @@ class ContainerTest < ActiveSupport::TestCase
     assert_equal [ { url: "https://immich.tail1234.ts.net" } ], container.launch_links
   end
 
+  test "fleet merges an app with its netns tailscale sidecar (app joins sidecar)" do
+    sidecar_id = "5" * 64
+    docker = stub_docker([
+      { "Id" => sidecar_id, "Names" => [ "/vault-ts-1" ], "Image" => "tailscale/tailscale:latest" },
+      { "Id" => "6" * 64, "Names" => [ "/vaultwarden" ], "Image" => "vaultwarden/server",
+        "HostConfig" => { "NetworkMode" => "container:#{sidecar_id}" } }
+    ])
+
+    fleet = Container.fleet(docker: docker, hostname: "devbox")
+
+    assert_equal [ "vaultwarden" ], fleet.map(&:name)
+    assert fleet.first.tailscale?
+    assert_equal "vault-ts-1", fleet.first.sidecar.name
+  end
+
+  test "fleet merges when the sidecar joins the app's namespace" do
+    app_id = "7" * 64
+    docker = stub_docker([
+      { "Id" => app_id, "Names" => [ "/immich" ], "Image" => "immich/server" },
+      { "Id" => "8" * 64, "Names" => [ "/immich-ts" ], "Image" => "tailscale/tailscale:v1.86",
+        "HostConfig" => { "NetworkMode" => "container:#{app_id}" } }
+    ])
+
+    fleet = Container.fleet(docker: docker, hostname: "devbox")
+
+    assert_equal [ "immich" ], fleet.map(&:name)
+    assert fleet.first.tailscale?
+  end
+
+  test "a network-attached sidecar keeps its own row, badged" do
+    docker = stub_docker([
+      { "Id" => "9" * 64, "Names" => [ "/propertee-tailscale-1" ], "Image" => "tailscale/tailscale:latest",
+        "HostConfig" => { "NetworkMode" => "propertee_default" } },
+      { "Id" => "0" * 64, "Names" => [ "/propertee-web-1" ], "Image" => "rails-app",
+        "HostConfig" => { "NetworkMode" => "propertee_default" } }
+    ])
+
+    fleet = Container.fleet(docker: docker, hostname: "devbox")
+
+    assert_equal 2, fleet.size
+    sidecar_row = fleet.find { |c| c.name == "propertee-tailscale-1" }
+    assert sidecar_row.tailscale?
+    assert_nil sidecar_row.sidecar
+  end
+
   private
 
   def build_container(attrs = {})

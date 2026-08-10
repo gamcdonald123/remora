@@ -6,10 +6,35 @@ class Container
   attr_reader :attrs
 
   def self.fleet(docker: Remora::Docker.new, hostname: Socket.gethostname)
-    docker.containers
-          .map { |attrs| new(attrs) }
-          .reject { |container| container.hosts?(hostname) || container.hidden? }
-          .sort_by { |c| [ c.compose_project ? 0 : 1, c.compose_project.to_s, c.name ] }
+    containers = docker.containers
+                       .map { |attrs| new(attrs) }
+                       .reject { |container| container.hosts?(hostname) || container.hidden? }
+
+    merge_sidecars(containers)
+      .sort_by { |c| [ c.compose_project ? 0 : 1, c.compose_project.to_s, c.name ] }
+  end
+
+  # A tailscale sidecar sharing a network namespace with an app container
+  # (either direction of network_mode: container:<id>) folds into the app's
+  # row. Network-attached sidecars stay as their own row.
+  def self.merge_sidecars(containers)
+    by_id = containers.index_by(&:id)
+    merged = []
+
+    containers.each do |container|
+      next if merged.include?(container.id)
+
+      joined = by_id[container.netns_target]
+      partner = [ joined, containers.find { |c| c.netns_target == container.id } ].compact.first
+
+      if partner && (container.tailscale_sidecar? ^ partner.tailscale_sidecar?)
+        app, sidecar = container.tailscale_sidecar? ? [ partner, container ] : [ container, partner ]
+        app.sidecar = sidecar
+        merged << sidecar.id
+      end
+    end
+
+    containers.reject { |c| merged.include?(c.id) }
   end
 
   def initialize(attrs)
@@ -31,6 +56,18 @@ class Container
   # Inside a container, the hostname is the short container id — how Remora
   # recognises (and hides) itself.
   def hosts?(hostname) = id.to_s.start_with?(hostname)
+
+  # The merged-in tailscale sidecar, when this row represents a netns pair.
+  attr_accessor :sidecar
+
+  def tailscale_sidecar? = image.to_s.start_with?("tailscale/tailscale")
+  def tailscale? = sidecar.present? || tailscale_sidecar?
+
+  # The container id this one shares a network namespace with, if any.
+  def netns_target
+    mode = attrs.dig("HostConfig", "NetworkMode").to_s
+    mode.delete_prefix("container:") if mode.start_with?("container:")
+  end
 
   HTTPS_PORTS = [ 443, 8443 ].freeze
 

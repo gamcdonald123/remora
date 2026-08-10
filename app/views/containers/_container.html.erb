@@ -4,6 +4,9 @@
     <%= link_to container.display_name, logs_container_path(container.short_id),
           data: { turbo_frame: "drawer" }, class: "logs-link" %>
   </span>
+  <% if container.tailscale? %>
+    <span class="badge badge-ts" title="<%= container.sidecar ? "behind Tailscale sidecar #{container.sidecar.name}" : "Tailscale" %>">ts</span>
+  <% end %>
   <span class="container-chips">
     <% container.launch_links.each do |link| %>
       <%= launch_chip(link) %>
