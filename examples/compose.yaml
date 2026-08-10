@@ -1,0 +1,29 @@
+# Recommended install: Remora reachable only over your tailnet, behind its
+# own Tailscale sidecar. Set TS_AUTHKEY (an auth key from the Tailscale admin
+# console) in your environment or a .env file.
+services:
+  ts-remora:
+    image: tailscale/tailscale:latest
+    hostname: remora
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}
+      - TS_SERVE_CONFIG=/config/serve.json
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_USERSPACE=true
+    volumes:
+      - ts-state:/var/lib/tailscale
+      - ./ts-serve.json:/config/serve.json:ro
+    restart: unless-stopped
+
+  remora:
+    image: ghcr.io/gamcdonald123/remora:latest
+    network_mode: service:ts-remora
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - remora-data:/data
+    depends_on: [ts-remora]
+    restart: unless-stopped
+
+volumes:
+  ts-state:
+  remora-data:
