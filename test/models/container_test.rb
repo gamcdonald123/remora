@@ -79,6 +79,36 @@ class ContainerTest < ActiveSupport::TestCase
     assert_equal [ "api", "db", "web", "zeta" ], fleet.map(&:name)
   end
 
+  test "launch_links derives one link per published port with scheme by convention" do
+    container = build_container("Ports" => [
+      { "PrivatePort" => 80, "PublicPort" => 8080, "Type" => "tcp", "IP" => "0.0.0.0" },
+      { "PrivatePort" => 80, "PublicPort" => 8080, "Type" => "tcp", "IP" => "::" },
+      { "PrivatePort" => 443, "PublicPort" => 8443, "Type" => "tcp", "IP" => "0.0.0.0" }
+    ])
+
+    assert_equal [ { port: 8080, scheme: "http" }, { port: 8443, scheme: "https" } ],
+                 container.launch_links
+  end
+
+  test "launch_links skips loopback-bound, udp, and unpublished ports" do
+    container = build_container("Ports" => [
+      { "PrivatePort" => 5432, "PublicPort" => 5432, "Type" => "tcp", "IP" => "127.0.0.1" },
+      { "PrivatePort" => 53, "PublicPort" => 5353, "Type" => "udp", "IP" => "0.0.0.0" },
+      { "PrivatePort" => 9000, "Type" => "tcp" }
+    ])
+
+    assert_empty container.launch_links
+  end
+
+  test "remora.url label replaces all derived links" do
+    container = build_container(
+      "Ports" => [ { "PrivatePort" => 80, "PublicPort" => 8080, "Type" => "tcp", "IP" => "0.0.0.0" } ],
+      "Labels" => { "remora.url" => "https://immich.tail1234.ts.net" }
+    )
+
+    assert_equal [ { url: "https://immich.tail1234.ts.net" } ], container.launch_links
+  end
+
   private
 
   def build_container(attrs = {})

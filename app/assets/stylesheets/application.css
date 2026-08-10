@@ -81,6 +81,24 @@ main {
 
 .container-status { margin-left: auto; }
 
+.container-chips { display: flex; gap: 0.3rem; }
+
+.chip {
+  font-size: 0.72rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  padding: 0.1rem 0.5rem;
+  border: 1px solid var(--row-border);
+  border-radius: 999px;
+  color: var(--fg-muted);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.chip:hover {
+  border-color: var(--ok);
+  color: var(--fg);
+}
+
 .uptime-strip {
   width: 6rem;
   height: 0.4rem;

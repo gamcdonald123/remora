@@ -32,6 +32,22 @@ class Container
   # recognises (and hides) itself.
   def hosts?(hostname) = id.to_s.start_with?(hostname)
 
+  HTTPS_PORTS = [ 443, 8443 ].freeze
+
+  # Launch targets: {url:} for explicit overrides, {port:, scheme:} for
+  # published ports (the host half is resolved in the browser, since rows
+  # also render from broadcasts where no request context exists).
+  def launch_links
+    override = labels["remora.url"].presence
+    return [ { url: override } ] if override
+
+    attrs.fetch("Ports", [])
+         .select { |p| p["PublicPort"] && p["Type"] == "tcp" && p["IP"] != "127.0.0.1" }
+         .map { |p| p["PublicPort"] }
+         .uniq.sort
+         .map { |port| { port: port, scheme: HTTPS_PORTS.include?(port) ? "https" : "http" } }
+  end
+
   def state_kind
     case attrs["State"]
     when "running" then status_text.include?("(unhealthy)") ? :unhealthy : :running

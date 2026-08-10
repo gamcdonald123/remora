@@ -4,6 +4,11 @@
     <%= link_to container.display_name, logs_container_path(container.short_id),
           data: { turbo_frame: "drawer" }, class: "logs-link" %>
   </span>
+  <span class="container-chips">
+    <% container.launch_links.each do |link| %>
+      <%= launch_chip(link) %>
+    <% end %>
+  </span>
   <span class="container-image"><%= container.image %></span>
   <%= uptime_strip(container.id) %>
   <% if Event.flapping?(container.id) %>
