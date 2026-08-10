@@ -21,6 +21,28 @@ module Remora
       get("/containers/#{id}/json")
     end
 
+    # Blocks, yielding each event as a parsed hash until the stream ends.
+    # Events arrive as newline-delimited JSON in arbitrary chunk sizes.
+    def events(since: nil, &block)
+      buffer = +""
+      streamer = lambda do |chunk, _remaining, _total|
+        buffer << chunk
+        while (line = buffer.slice!(/.*\n/))
+          block.call(JSON.parse(line))
+        end
+      end
+
+      connection.request(
+        method: :get, path: "/events",
+        query: { since: since }.compact,
+        response_block: streamer,
+        read_timeout: 3600
+      )
+      true
+    rescue Excon::Error => e
+      raise Error, "Docker socket #{@socket}: #{e.message}"
+    end
+
     def start_container(id) = post("/containers/#{id}/start")
     def stop_container(id) = post("/containers/#{id}/stop")
     def restart_container(id) = post("/containers/#{id}/restart")

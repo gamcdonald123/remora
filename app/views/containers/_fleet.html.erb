@@ -1,0 +1,12 @@
+<div id="fleet">
+  <% groups.each do |project, containers| %>
+    <section class="project" data-project="<%= project %>">
+      <% if project %>
+        <h2><%= project %></h2>
+      <% end %>
+      <div class="rows">
+        <%= render partial: "containers/container", collection: containers %>
+      </div>
+    </section>
+  <% end %>
+</div>

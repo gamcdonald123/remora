@@ -6,14 +6,6 @@
     <p class="error-detail"><%= @docker_error %></p>
   </div>
 <% else %>
-  <% @groups.each do |project, containers| %>
-    <section class="project" data-project="<%= project %>">
-      <% if project %>
-        <h2><%= project %></h2>
-      <% end %>
-      <div class="rows">
-        <%= render partial: "container", collection: containers %>
-      </div>
-    </section>
-  <% end %>
+  <%= turbo_stream_from "fleet" %>
+  <%= render "fleet", groups: @groups %>
 <% end %>

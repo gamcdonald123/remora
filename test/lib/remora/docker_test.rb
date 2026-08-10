@@ -86,6 +86,22 @@ module Remora
       assert_includes error.message, "driver exploded"
     end
 
+    test "events yields each JSON line from the stream, surviving chunk boundaries" do
+      chunks = [
+        %({"Type":"container","Action":"die","id":"aaa"}\n{"Type":"cont),
+        %(ainer","Action":"start","id":"bbb"}\n)
+      ]
+      Excon.stub({ method: :get, path: "/events" }) do |params|
+        chunks.each { |c| params[:response_block].call(c, nil, nil) }
+        { status: 200, body: "" }
+      end
+
+      seen = []
+      @client.events { |event| seen << [ event["Action"], event["id"] ] }
+
+      assert_equal [ [ "die", "aaa" ], [ "start", "bbb" ] ], seen
+    end
+
     test "non-2xx responses raise Remora::Docker::Error with the engine message" do
       Excon.stub(
         { method: :get, path: "/containers/missing/json" },

@@ -9,9 +9,9 @@ Details, acceptance criteria, and verification steps: [plan.md](plan.md).
 - [x] **Checkpoint 1:** real fleet renders; suite green
 
 ## Phase 2 — Control
-- [ ] 4. Start / stop / restart actions (confirm, toasts, Turbo row refresh) — M
-- [ ] 5. Events listener thread → live row broadcasts ⚠ highest risk — M
-- [ ] **Checkpoint 2:** two-browser live updates from terminal docker commands
+- [x] 4. Start / stop / restart actions (confirm, toasts, Turbo row refresh) — M
+- [x] 5. Events listener thread → live row broadcasts ⚠ highest risk — M
+- [x] **Checkpoint 2:** two-browser live updates from terminal docker commands
 
 ## Phase 3 — Logs
 - [ ] 6. Logs drawer, static tail + demuxer (TTY & non-TTY) — M
