@@ -2,6 +2,9 @@ ENV["RAILS_ENV"] ||= "test"
 require_relative "../config/environment"
 require "rails/test_help"
 
+# All Docker Engine API calls are stubbed — the suite never touches a real socket.
+Excon.defaults[:mock] = true
+
 module ActiveSupport
   class TestCase
     # Run tests in parallel with specified workers
