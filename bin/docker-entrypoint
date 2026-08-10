@@ -1,5 +1,15 @@
 #!/bin/bash -e
 
+# Zero-config secret: generated once on first boot, persisted in the data
+# volume. Supply SECRET_KEY_BASE explicitly to override.
+if [ -z "${SECRET_KEY_BASE}" ] && [ -d /data ]; then
+  if [ ! -f /data/.secret_key_base ]; then
+    head -c 64 /dev/urandom | od -An -tx1 | tr -d ' \n' > /data/.secret_key_base
+  fi
+  SECRET_KEY_BASE="$(cat /data/.secret_key_base)"
+  export SECRET_KEY_BASE
+fi
+
 # If running the rails server then create or migrate existing database
 if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
   ./bin/rails db:prepare

@@ -16,6 +16,10 @@ module Remora
 
     def initialize(docker)
       @docker = docker
+      # The streaming connection is busy for the lifetime of the events
+      # request — fleet queries during handling need their own connection,
+      # or they'd kill the stream mid-read.
+      @query_docker = Remora::Docker.new(socket: docker.socket)
       @last_seen = nil
     end
 
@@ -44,7 +48,7 @@ module Remora
 
       Event.record(event)
       Tailscale.invalidate(event["id"]) if event["id"]
-      Broadcaster.refresh_fleet(docker: @docker)
+      Broadcaster.refresh_fleet(docker: @query_docker)
     rescue StandardError => e
       Rails.logger.warn("[remora] event handling error: #{e.message}")
     end

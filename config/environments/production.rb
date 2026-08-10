@@ -22,10 +22,12 @@ Rails.application.configure do
   # config.asset_host = "http://assets.example.com"
 
   # Assume all access to the app is happening through a SSL-terminating reverse proxy.
-  config.assume_ssl = true
+  # TLS terminates at the Tailscale sidecar (or doesn't exist on a LAN
+  # install) — forcing SSL here would redirect-loop behind ts serve.
+  config.assume_ssl = false
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
-  config.force_ssl = true
+  config.force_ssl = false
 
   # Skip http-to-https redirect for the default health check endpoint.
   # config.ssl_options = { redirect: { exclude: ->(request) { request.path == "/up" } } }
@@ -45,7 +47,7 @@ Rails.application.configure do
 
   # Replace the default in-process memory cache store with a durable alternative.
   # Single-process app: in-memory cache (tailscale exec memoization).
-  config.cache_store = :memory_store, { size: 8.megabytes }
+  config.cache_store = :memory_store, { size: 8 * 1024 * 1024 }
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).

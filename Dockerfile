@@ -1,9 +1,8 @@
 # syntax=docker/dockerfile:1
 # check=error=true
 
-# This Dockerfile is designed for production, not development. Use with Kamal or build'n'run by hand:
-# docker build -t remora .
-# docker run -d -p 80:80 -e RAILS_MASTER_KEY=<value from config/master.key> --name remora remora
+# Production image. Build: docker build -t remora .
+# Run: see README — needs /var/run/docker.sock mounted and a /data volume.
 
 # For a containerized dev environment, see Dev Containers: https://guides.rubyonrails.org/getting_started_with_devcontainer.html
 
@@ -60,18 +59,27 @@ RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 # Final stage for app image
 FROM base
 
-# Run and own only the runtime files as a non-root user for security
-RUN groupadd --system --gid 1000 rails && \
-    useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash
-USER 1000:1000
+# Runs as root: the mounted docker.sock is root/docker-group owned on most
+# hosts, and a fixed non-root uid would break the turnkey install (the spec's
+# zero-config rule). The socket grants root-equivalence regardless — network
+# placement (tailnet-only) is the security model, not the container user.
+RUN mkdir /data
+
+# SQLite + the generated secret live here — the single volume.
+VOLUME /data
 
 # Copy built artifacts: gems, application
-COPY --chown=rails:rails --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
-COPY --chown=rails:rails --from=build /rails /rails
+COPY --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
+COPY --from=build /rails /rails
 
 # Entrypoint prepares the database.
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 
 # Start server via Thruster by default, this can be overwritten at runtime
-EXPOSE 80
+ENV HTTP_PORT=8080
+EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s \
+  CMD curl -fsS http://localhost:8080/up || exit 1
+
 CMD ["./bin/thrust", "./bin/rails", "server"]

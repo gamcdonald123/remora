@@ -8,6 +8,8 @@ module Remora
 
     DEFAULT_SOCKET = "/var/run/docker.sock".freeze
 
+    attr_reader :socket
+
     def initialize(socket: ENV.fetch("DOCKER_SOCKET", DEFAULT_SOCKET))
       @socket = socket
     end
