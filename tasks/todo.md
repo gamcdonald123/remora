@@ -26,10 +26,10 @@ Details, acceptance criteria, and verification steps: [plan.md](plan.md).
 - [x] **Checkpoint 4:** strips truthful across Remora restarts
 
 ## Phase 5 — Links & Tailscale
-- [ ] 12. Port launch chips (Host-header derived, `remora.url`) — S
-- [ ] 13. TS sidecar detection + merged rows — M
-- [ ] 14. Tailnet URL chips via exec (`tailscale status/serve`) — M
-- [ ] **Checkpoint 5:** tailnet chip works on a real TS stack
+- [x] 12. Port launch chips (Host-header derived, `remora.url`) — S
+- [x] 13. TS sidecar detection + merged rows — M
+- [x] 14. Tailnet URL chips via exec (`tailscale status/serve`) — M
+- [x] **Checkpoint 5:** tailnet chip works on a real TS stack
 
 ## Phase 6 — Package & ship
 - [ ] 15. Production image (non-root, /data, self-managed secret, multi-arch) — M

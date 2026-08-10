@@ -1,0 +1,23 @@
+{
+  "Version": "1.98.10-t36550d57f",
+  "TUN": false,
+  "BackendState": "Running",
+  "HaveNodeKey": true,
+  "AuthURL": "",
+  "TailscaleIPs": [
+    "100.100.10.10",
+    "fd7a:115c:a1e0::f93b:0001"
+  ],
+  "Self": {
+    "ID": "nExample1CNTRL",
+    "PublicKey": "nodekey:0000000000000000000000000000000000000000000000000000000000000000",
+    "HostName": "vaultwarden",
+    "DNSName": "vaultwarden.example-tailnet.ts.net.",
+    "OS": "linux",
+    "TailscaleIPs": [
+      "100.100.10.10"
+    ],
+    "Online": true
+  },
+  "Peer": {}
+}

@@ -56,6 +56,8 @@ module Remora
       ).body
       raw = tty ? body.dup : LogDemux.call(body)
       raw.force_encoding(Encoding::UTF_8).scrub
+    ensure
+      @connection&.reset
     end
 
     # Follows the log stream, yielding demuxed text as it arrives. Always
@@ -81,6 +83,21 @@ module Remora
       raise Error, "Docker socket #{@socket}: #{e.message}"
     end
 
+    # Runs a command in the container, returning demuxed combined output.
+    def exec(id, cmd)
+      created = JSON.parse(
+        request(:post, "/containers/#{id}/exec",
+                body: { AttachStdout: true, AttachStderr: true, Cmd: cmd }.to_json).body
+      )
+      response = request(:post, "/exec/#{created.fetch("Id")}/start",
+                         body: { Detach: false, Tty: false }.to_json)
+      LogDemux.call(response.body)
+    ensure
+      # The exec stream has no content length — the persistent connection
+      # can't be trusted for another request afterwards.
+      @connection&.reset
+    end
+
     def start_container(id) = post("/containers/#{id}/start")
     def stop_container(id) = post("/containers/#{id}/stop")
     def restart_container(id) = post("/containers/#{id}/restart")
@@ -96,8 +113,10 @@ module Remora
       true
     end
 
-    def request(method, path, query: {})
-      response = connection.request(method: method, path: path, query: query)
+    def request(method, path, query: {}, body: nil)
+      headers = body ? { "Content-Type" => "application/json" } : {}
+      response = connection.request(method: method, path: path, query: query,
+                                    body: body, headers: headers)
       raise Error, engine_message(response) if response.status >= 400
 
       response

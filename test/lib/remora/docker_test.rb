@@ -131,6 +131,25 @@ module Remora
       assert_raises(Remora::Docker::TimeoutError) { @client.stream_logs("abc", since: 0) { } }
     end
 
+    test "exec creates an exec instance, runs it, and returns demuxed output" do
+      bodies = []
+      Excon.stub({ method: :post, path: "/containers/abc/exec" }) do |params|
+        bodies << params[:body]
+        { status: 201, body: { "Id" => "exec123" }.to_json }
+      end
+      frame = [ 1, 0, 0, 0, 5 ].pack("CC3N") + "out\n\n"
+      Excon.stub({ method: :post, path: "/exec/exec123/start" }) do |params|
+        bodies << params[:body]
+        { status: 200, body: frame }
+      end
+
+      output = @client.exec("abc", [ "tailscale", "status", "--json" ])
+
+      assert_equal "out\n\n", output
+      assert_includes bodies[0], '"Cmd":["tailscale","status","--json"]'
+      assert_includes bodies[1], '"Detach":false'
+    end
+
     test "non-2xx responses raise Remora::Docker::Error with the engine message" do
       Excon.stub(
         { method: :get, path: "/containers/missing/json" },

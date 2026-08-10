@@ -43,6 +43,7 @@ module Remora
       return unless RELEVANT_ACTIONS.include?(action)
 
       Event.record(event)
+      Tailscale.invalidate(event["id"]) if event["id"]
       Broadcaster.refresh_fleet(docker: @docker)
     rescue StandardError => e
       Rails.logger.warn("[remora] event handling error: #{e.message}")

@@ -8,6 +8,11 @@
     <span class="badge badge-ts" title="<%= container.sidecar ? "behind Tailscale sidecar #{container.sidecar.name}" : "Tailscale" %>">ts</span>
   <% end %>
   <span class="container-chips">
+    <% if container.tailscale? %>
+      <% Remora::Tailscale.links_for((container.sidecar || container).id).each do |link| %>
+        <%= launch_chip(link) %>
+      <% end %>
+    <% end %>
     <% container.launch_links.each do |link| %>
       <%= launch_chip(link) %>
     <% end %>
