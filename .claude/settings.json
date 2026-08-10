@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "Edit",
+      "Write"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(*db:drop*)",
+      "Bash(*db:reset*)",
+      "Bash(*db:schema:load*)",
+      "Bash(*db:purge*)",
+      "Bash(*rails destroy *)",
+      "Bash(*rails db:seed:replant*)"
+    ]
+  }
+}

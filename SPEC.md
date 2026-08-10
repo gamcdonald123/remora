@@ -153,11 +153,11 @@ Any need that can't be met by these three gets designed as discovery, not as a f
 
 **Memory budget: < 250MB RSS steady-state** (the DXP2800 test: it must be a good citizen on an 8GB NAS). Measured in CI as a smoke check.
 
-### Data model (3 tables)
+### Data model (1 table)
 
-- `containers` — cached snapshot of discovery (docker_id, name, display_name, compose_project, state, health, image, labels JSON, links JSON, sidecar linkage). Rebuilt from Docker at any time; SQLite is a cache here, not a source of truth.
 - `events` — append-only state transitions (container docker_id, kind, exit_code, occurred_at). Source of the uptime strip. Pruned at 30 days.
-- `exec_cache` — memoized `tailscale status/serve` results per sidecar with fetched_at.
+
+The fleet view renders directly from the Docker API on each request (local unix socket, sub-millisecond) — no `containers` cache table. Tailscale exec results memoize in `Rails.cache` (memory store) with event-driven invalidation — no `exec_cache` table. Revisit both only if multi-host (phase 3) happens. Puma runs ~10 threads to budget for held SSE log-follow connections.
 
 ## 9. Security posture
 
