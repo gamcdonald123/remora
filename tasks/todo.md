@@ -3,10 +3,10 @@
 Details, acceptance criteria, and verification steps: [plan.md](plan.md).
 
 ## Phase 1 — See
-- [ ] 1. Docker socket client (`Remora::Docker`, Excon) — S
-- [ ] 2. Fleet view page (grouped container list, self-hide) — M
-- [ ] 3. Label handling (`remora.hide`, `remora.name`) — XS
-- [ ] **Checkpoint 1:** real fleet renders; suite green
+- [x] 1. Docker socket client (`Remora::Docker`, Excon) — S
+- [x] 2. Fleet view page (grouped container list, self-hide) — M
+- [x] 3. Label handling (`remora.hide`, `remora.name`) — XS
+- [x] **Checkpoint 1:** real fleet renders; suite green
 
 ## Phase 2 — Control
 - [ ] 4. Start / stop / restart actions (confirm, toasts, Turbo row refresh) — M
