@@ -5,6 +5,12 @@
           data: { turbo_frame: "drawer" }, class: "logs-link" %>
   </span>
   <span class="container-image"><%= container.image %></span>
+  <%= uptime_strip(container.id) %>
+  <% if Event.flapping?(container.id) %>
+    <span class="badge badge-flapping" title="3+ exits within 10 minutes">flapping</span>
+  <% elsif (exits = Event.exit_count(container.id)).positive? %>
+    <span class="badge badge-exits" title="exits in the last 24h">↻ <%= exits %></span>
+  <% end %>
   <span class="container-status"><%= container.status_text %></span>
   <span class="container-actions">
     <% if container.state_kind == :exited %>

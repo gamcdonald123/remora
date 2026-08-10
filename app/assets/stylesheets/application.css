@@ -81,6 +81,34 @@ main {
 
 .container-status { margin-left: auto; }
 
+.uptime-strip {
+  width: 6rem;
+  height: 0.4rem;
+  border-radius: 2px;
+  flex: none;
+}
+
+.uptime-up      { fill: var(--ok); }
+.uptime-down    { fill: var(--bad); }
+.uptime-unknown { fill: var(--row-border); }
+
+.badge {
+  font-size: 0.7rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.badge-flapping {
+  background: color-mix(in srgb, var(--bad) 15%, transparent);
+  color: var(--bad);
+}
+
+.badge-exits {
+  background: color-mix(in srgb, var(--warn) 15%, transparent);
+  color: var(--warn);
+}
+
 .container-actions {
   display: flex;
   gap: 0.4rem;

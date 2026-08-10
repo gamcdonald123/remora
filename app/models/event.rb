@@ -36,6 +36,40 @@ class Event < ApplicationRecord
     nano ? Time.zone.at(Rational(nano, 1_000_000_000)) : Time.current
   end
 
+  STATE_CHANGING = %w[start die oom].freeze
+
+  # Up/down/unknown segments covering the window, oldest first, for the strip.
+  def self.timeline_for(docker_id, window: 24.hours, now: Time.current)
+    from = now - window
+    prior = where(docker_id: docker_id, kind: STATE_CHANGING)
+              .where(occurred_at: ...from).order(:occurred_at).last
+    state = prior.nil? ? :unknown : (prior.kind == "start" ? :up : :down)
+
+    segments = []
+    cursor = from
+    where(docker_id: docker_id, kind: STATE_CHANGING, occurred_at: from..now)
+      .order(:occurred_at).each do |event|
+      new_state = event.kind == "start" ? :up : :down
+      next if new_state == state
+
+      segments << { state: state, from: cursor, to: event.occurred_at }
+      state = new_state
+      cursor = event.occurred_at
+    end
+    segments << { state: state, from: cursor, to: now }
+    segments
+  end
+
+  def self.flapping?(docker_id, now: Time.current)
+    dies = where(docker_id: docker_id, kind: "die", occurred_at: (now - 24.hours)..now)
+             .order(:occurred_at).pluck(:occurred_at)
+    dies.each_cons(3).any? { |first, _, third| third - first <= 10.minutes }
+  end
+
+  def self.exit_count(docker_id, window: 24.hours, now: Time.current)
+    where(docker_id: docker_id, kind: "die", occurred_at: (now - window)..now).count
+  end
+
   def self.prune!
     where(occurred_at: ...RETENTION.ago).delete_all
   end
