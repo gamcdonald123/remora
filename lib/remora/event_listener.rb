@@ -42,6 +42,7 @@ module Remora
       action = event["Action"].to_s.split(":").first
       return unless RELEVANT_ACTIONS.include?(action)
 
+      Event.record(event)
       Broadcaster.refresh_fleet(docker: @docker)
     rescue StandardError => e
       Rails.logger.warn("[remora] event handling error: #{e.message}")

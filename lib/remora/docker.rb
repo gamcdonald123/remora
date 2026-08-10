@@ -54,7 +54,7 @@ module Remora
         :get, "/containers/#{id}/logs",
         query: { stdout: 1, stderr: 1, tail: tail, timestamps: timestamps ? 1 : 0 }
       ).body
-      raw = tty ? body : LogDemux.call(body)
+      raw = tty ? body.dup : LogDemux.call(body)
       raw.force_encoding(Encoding::UTF_8).scrub
     end
 

@@ -35,6 +35,16 @@ module Remora
       assert_equal 1, streams.size
     end
 
+    test "lifecycle events are persisted" do
+      @listener.handle(
+        "Type" => "container", "Action" => "die", "id" => "a" * 64,
+        "Actor" => { "ID" => "a" * 64, "Attributes" => { "name" => "web", "exitCode" => "0" } },
+        "timeNano" => 1_754_868_000_000_000_000
+      )
+
+      assert_equal 1, Event.where(kind: "die", docker_id: "a" * 64).count
+    end
+
     test "non-container and irrelevant events are ignored" do
       streams = capture_turbo_stream_broadcasts("fleet") do
         @listener.handle({ "Type" => "network", "Action" => "connect" })
