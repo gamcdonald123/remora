@@ -21,13 +21,26 @@ module Remora
       get("/containers/#{id}/json")
     end
 
+    def start_container(id) = post("/containers/#{id}/start")
+    def stop_container(id) = post("/containers/#{id}/stop")
+    def restart_container(id) = post("/containers/#{id}/restart")
+
     private
 
     def get(path, query: {})
-      response = connection.request(method: :get, path: path, query: query)
+      JSON.parse(request(:get, path, query: query).body)
+    end
+
+    def post(path)
+      request(:post, path)
+      true
+    end
+
+    def request(method, path, query: {})
+      response = connection.request(method: method, path: path, query: query)
       raise Error, engine_message(response) if response.status >= 400
 
-      JSON.parse(response.body)
+      response
     rescue Excon::Error => e
       raise Error, "Docker socket #{@socket}: #{e.message}"
     end

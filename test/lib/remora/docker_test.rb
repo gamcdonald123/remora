@@ -56,6 +56,36 @@ module Remora
       assert_equal "29.5.2", @client.version["Version"]
     end
 
+    test "start/stop/restart post to the engine action endpoints" do
+      posted = []
+      Excon.stub({ method: :post }) do |params|
+        posted << params[:path]
+        { status: 204, body: "" }
+      end
+
+      @client.start_container("abc")
+      @client.stop_container("abc")
+      @client.restart_container("abc")
+
+      assert_equal [ "/containers/abc/start", "/containers/abc/stop", "/containers/abc/restart" ], posted
+    end
+
+    test "already-stopped (304) is treated as success" do
+      Excon.stub({ method: :post, path: "/containers/abc/stop" }, { status: 304, body: "" })
+
+      assert_nothing_raised { @client.stop_container("abc") }
+    end
+
+    test "action failures raise with the engine message" do
+      Excon.stub(
+        { method: :post, path: "/containers/abc/start" },
+        { status: 500, body: { "message" => "driver exploded" }.to_json }
+      )
+
+      error = assert_raises(Remora::Docker::Error) { @client.start_container("abc") }
+      assert_includes error.message, "driver exploded"
+    end
+
     test "non-2xx responses raise Remora::Docker::Error with the engine message" do
       Excon.stub(
         { method: :get, path: "/containers/missing/json" },

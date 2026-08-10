@@ -10,4 +10,12 @@ Rails.application.routes.draw do
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
   root "containers#index"
+
+  resources :containers, only: [], controller: "container_actions" do
+    member do
+      post :start
+      post :stop
+      post :restart
+    end
+  end
 end

@@ -3,4 +3,13 @@
   <span class="container-name"><%= container.display_name %></span>
   <span class="container-image"><%= container.image %></span>
   <span class="container-status"><%= container.status_text %></span>
+  <span class="container-actions">
+    <% if container.state_kind == :exited %>
+      <%= button_to "start", start_container_path(container.short_id), class: "action-button" %>
+    <% else %>
+      <%= button_to "restart", restart_container_path(container.short_id), class: "action-button" %>
+      <%= button_to "stop", stop_container_path(container.short_id), class: "action-button action-stop",
+            form: { data: { controller: "confirm", action: "submit->confirm#intercept" } } %>
+    <% end %>
+  </span>
 </div>

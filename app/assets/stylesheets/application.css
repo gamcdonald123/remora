@@ -81,6 +81,50 @@ main {
 
 .container-status { margin-left: auto; }
 
+.container-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.container-actions form { display: inline; }
+
+.action-button {
+  font: inherit;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.6rem;
+  border: 1px solid var(--row-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg);
+  cursor: pointer;
+}
+
+.action-button:hover { border-color: var(--fg-muted); }
+
+.action-stop.armed {
+  border-color: var(--bad);
+  color: var(--bad);
+}
+
+#toasts {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 10;
+}
+
+.toast {
+  background: var(--fg);
+  color: var(--bg);
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  max-width: 24rem;
+}
+
 .docker-unreachable {
   margin-top: 3rem;
   text-align: center;
