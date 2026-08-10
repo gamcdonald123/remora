@@ -1,2 +1,10 @@
 #!/usr/bin/env ruby
+
+# macOS dev fallback: colima's socket when DOCKER_SOCKET isn't set and the
+# default /var/run/docker.sock isn't answering.
+if ENV["DOCKER_SOCKET"].nil?
+  colima = File.expand_path("~/.colima/default/docker.sock")
+  ENV["DOCKER_SOCKET"] = colima if File.socket?(colima)
+end
+
 exec "./bin/rails", "server", *ARGV
