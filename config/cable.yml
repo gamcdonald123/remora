@@ -1,0 +1,9 @@
+development:
+  adapter: async
+
+test:
+  adapter: test
+
+# Single-process app (1 Puma worker) — in-process pub/sub, no Redis. See SPEC.md §8.
+production:
+  adapter: async
