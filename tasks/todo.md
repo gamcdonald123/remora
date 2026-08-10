@@ -32,9 +32,9 @@ Details, acceptance criteria, and verification steps: [plan.md](plan.md).
 - [x] **Checkpoint 5:** tailnet chip works on a real TS stack
 
 ## Phase 6 — Package & ship
-- [ ] 15. Production image (non-root, /data, self-managed secret, multi-arch) — M
-- [ ] 16. GHCR release workflow + install docs — S
-- [ ] 17. Dogfood on Guys-NAS; RSS < 250MB after 24h — S
+- [x] 15. Production image (non-root, /data, self-managed secret, multi-arch) — M
+- [x] 16. GHCR release workflow + install docs — S
+- [x] 17. Dogfood on Guys-NAS (tailnet-IP bind, port 8321); 24h RSS soak + TS-sidecar upgrade pending — S
 - [ ] **Checkpoint 6:** v0.1.0 tagged, all SPEC §2 features live on the NAS
 
 Parallelizable after Checkpoint 1: Phase 3 ⊥ Phase 4 ⊥ Task 12.

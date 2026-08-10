@@ -27,7 +27,16 @@ docker run -d --name remora \
   ghcr.io/gamcdonald123/remora:latest
 ```
 
-**Recommended: tailnet-only.** Remora holds your Docker socket — it should never be exposed to the LAN or internet. The tailnet *is* the auth layer. See [examples/compose.yaml](examples/compose.yaml) for the two-service compose file (Remora behind its own Tailscale sidecar with [examples/ts-serve.json](examples/ts-serve.json)); then open `https://remora.<your-tailnet>.ts.net`.
+**Recommended: tailnet-only.** Remora holds your Docker socket — it should never be exposed to the LAN or internet. The tailnet *is* the auth layer. Two ways to get there:
+
+1. **Own sidecar (nicest):** see [examples/compose.yaml](examples/compose.yaml) — Remora behind its own Tailscale sidecar with [examples/ts-serve.json](examples/ts-serve.json); open `https://remora.<your-tailnet>.ts.net`. Needs a `TS_AUTHKEY`.
+2. **No new node:** if the host already runs tailscaled, bind the port to the host's tailnet IP instead of `-p 8080:8080`:
+
+   ```bash
+   -p <host-tailnet-ip>:8080:8080
+   ```
+
+   then open `http://<host-name>:8080` from anywhere on your tailnet. No auth key, no TLS, same reachability boundary.
 
 ## Configuration
 
