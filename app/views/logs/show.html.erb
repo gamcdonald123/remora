@@ -1,8 +1,12 @@
 <%= turbo_frame_tag "drawer" do %>
-  <aside class="drawer" data-controller="drawer">
+  <aside class="drawer" data-controller="drawer logsearch">
     <header class="drawer-header">
       <h2><%= @container_name || @id %></h2>
       <% unless @docker_error %>
+        <input type="search" class="log-search" placeholder="filter…" autocomplete="off"
+               data-logsearch-target="input"
+               data-action="input->logsearch#filter keydown->logsearch#keydown">
+        <span class="log-search-count" data-logsearch-target="count"></span>
         <nav class="drawer-tools">
           <%= link_to @timestamps ? "hide times" : "times",
                 logs_container_path(@id, tail: @tail, timestamps: @timestamps ? nil : 1),
@@ -19,9 +23,9 @@
     <% if @docker_error %>
       <p class="error-detail"><%= @docker_error %></p>
     <% else %>
-      <div class="log-lines">
+      <div class="log-lines" data-logsearch-target="lines">
         <% @lines.each do |line| %>
-          <div class="log-line"><%= line %></div>
+          <div class="log-line <%= severity_class(line) %>"><%= line %></div>
         <% end %>
       </div>
     <% end %>

@@ -191,6 +191,26 @@ main {
 
 .log-line { white-space: pre-wrap; word-break: break-all; }
 
+.sev-error { color: var(--bad); }
+.sev-warn  { color: var(--warn); }
+
+.log-search {
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--row-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg);
+  width: 11rem;
+}
+
+.log-search-count {
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+  white-space: nowrap;
+}
+
 .docker-unreachable {
   margin-top: 3rem;
   text-align: center;
