@@ -1,0 +1,5 @@
+# Rails app will add its own; project-level basics
+.DS_Store
+*.log
+/data/
+.env
