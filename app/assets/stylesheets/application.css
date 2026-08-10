@@ -125,6 +125,72 @@ main {
   max-width: 24rem;
 }
 
+.logs-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.logs-link:hover { text-decoration: underline; }
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(44rem, 90vw);
+  background: var(--bg);
+  border-left: 1px solid var(--row-border);
+  box-shadow: -8px 0 24px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  z-index: 20;
+}
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--row-border);
+}
+
+.drawer-header h2 {
+  margin: 0;
+  font-size: 0.95rem;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.drawer-tools { display: flex; gap: 0.6rem; }
+
+.drawer-tool {
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+}
+
+.drawer-close {
+  font: inherit;
+  font-size: 1.2rem;
+  background: none;
+  border: none;
+  color: var(--fg-muted);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.log-lines {
+  flex: 1;
+  overflow: auto;
+  padding: 0.75rem 1rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.log-line { white-space: pre-wrap; word-break: break-all; }
+
 .docker-unreachable {
   margin-top: 3rem;
   text-align: center;

@@ -1,6 +1,9 @@
 <div id="<%= container.dom_id %>" class="container-row">
   <span class="state-dot state-<%= container.state_kind %>" title="<%= container.attrs["State"] %>"></span>
-  <span class="container-name"><%= container.display_name %></span>
+  <span class="container-name">
+    <%= link_to container.display_name, logs_container_path(container.short_id),
+          data: { turbo_frame: "drawer" }, class: "logs-link" %>
+  </span>
   <span class="container-image"><%= container.image %></span>
   <span class="container-status"><%= container.status_text %></span>
   <span class="container-actions">

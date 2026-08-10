@@ -1,0 +1,29 @@
+<%= turbo_frame_tag "drawer" do %>
+  <aside class="drawer" data-controller="drawer">
+    <header class="drawer-header">
+      <h2><%= @container_name || @id %></h2>
+      <% unless @docker_error %>
+        <nav class="drawer-tools">
+          <%= link_to @timestamps ? "hide times" : "times",
+                logs_container_path(@id, tail: @tail, timestamps: @timestamps ? nil : 1),
+                class: "drawer-tool" %>
+          <% if @lines && @lines.size >= @tail %>
+            <%= link_to "older ↑", logs_container_path(@id, tail: @tail * 2, timestamps: @timestamps ? 1 : nil),
+                  class: "drawer-tool" %>
+          <% end %>
+        </nav>
+      <% end %>
+      <button type="button" class="drawer-close" data-action="drawer#close" aria-label="Close logs">×</button>
+    </header>
+
+    <% if @docker_error %>
+      <p class="error-detail"><%= @docker_error %></p>
+    <% else %>
+      <div class="log-lines">
+        <% @lines.each do |line| %>
+          <div class="log-line"><%= line %></div>
+        <% end %>
+      </div>
+    <% end %>
+  </aside>
+<% end %>

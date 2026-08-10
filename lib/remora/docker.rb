@@ -43,6 +43,18 @@ module Remora
       raise Error, "Docker socket #{@socket}: #{e.message}"
     end
 
+    # Merged stdout+stderr tail as one UTF-8 string, demuxed when the
+    # container has no TTY.
+    def logs(id, tail: 500, timestamps: false)
+      tty = inspect_container(id).dig("Config", "Tty")
+      body = request(
+        :get, "/containers/#{id}/logs",
+        query: { stdout: 1, stderr: 1, tail: tail, timestamps: timestamps ? 1 : 0 }
+      ).body
+      raw = tty ? body : LogDemux.call(body)
+      raw.force_encoding(Encoding::UTF_8).scrub
+    end
+
     def start_container(id) = post("/containers/#{id}/start")
     def stop_container(id) = post("/containers/#{id}/stop")
     def restart_container(id) = post("/containers/#{id}/restart")
