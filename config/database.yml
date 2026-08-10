@@ -28,4 +28,6 @@ test:
 # ensure the database is located in a persisted volume.
 production:
   <<: *default
-  # database: path/to/persistent/storage/production.sqlite3
+  # /data is the container's single volume (SPEC §3); overridable for
+  # non-container runs.
+  database: <%= ENV.fetch("DATABASE_PATH", "/data/remora.sqlite3") %>

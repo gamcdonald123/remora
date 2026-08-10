@@ -20,10 +20,10 @@ Details, acceptance criteria, and verification steps: [plan.md](plan.md).
 - [x] **Checkpoint 3:** full log UX on real containers
 
 ## Phase 4 — Uptime
-- [ ] 9. `events` table + recorder + 30d prune — S
-- [ ] 10. 24h uptime strip + restart/flapping badges — M
-- [ ] 11. Reconciler thread (heal missed events) — S
-- [ ] **Checkpoint 4:** strips truthful across Remora restarts
+- [x] 9. `events` table + recorder + 30d prune — S
+- [x] 10. 24h uptime strip + restart/flapping badges — M
+- [x] 11. Reconciler thread (heal missed events) — S
+- [x] **Checkpoint 4:** strips truthful across Remora restarts
 
 ## Phase 5 — Links & Tailscale
 - [ ] 12. Port launch chips (Host-header derived, `remora.url`) — S

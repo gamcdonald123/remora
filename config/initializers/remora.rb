@@ -4,6 +4,7 @@ Rails.application.config.after_initialize do
   serving = defined?(Rails::Server) || ENV["REMORA_BACKGROUND"] == "1"
   next unless serving && !Rails.env.test?
 
-  Rails.logger.info("[remora] starting event listener")
+  Rails.logger.info("[remora] starting event listener and reconciler")
   Remora::EventListener.start
+  Remora::Reconciler.start
 end
