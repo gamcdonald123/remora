@@ -9,6 +9,27 @@ class ContainerTest < ActiveSupport::TestCase
     assert_equal "vaultwarden", build_container("Names" => [ "/vaultwarden" ]).display_name
   end
 
+  test "display_name prefers the compose service name over the container name" do
+    container = build_container("Names" => [ "/vault-vaultwarden-1" ],
+                                "Labels" => { "com.docker.compose.service" => "vaultwarden" })
+    assert_equal "vaultwarden", container.display_name
+  end
+
+  test "display_name prefers the remora.name label over everything" do
+    container = build_container("Labels" => { "remora.name" => "Vaultwarden",
+                                              "com.docker.compose.service" => "vaultwarden" })
+    assert_equal "Vaultwarden", container.display_name
+  end
+
+  test "fleet excludes containers labelled remora.hide" do
+    docker = stub_docker([
+      { "Id" => "a" * 64, "Names" => [ "/secret" ], "Labels" => { "remora.hide" => "true" } },
+      { "Id" => "b" * 64, "Names" => [ "/web" ] }
+    ])
+
+    assert_equal [ "web" ], Container.fleet(docker: docker, hostname: "devbox").map(&:name)
+  end
+
   test "compose_project reads the compose label" do
     container = build_container("Labels" => { "com.docker.compose.project" => "propertee" })
     assert_equal "propertee", container.compose_project

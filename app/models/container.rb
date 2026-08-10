@@ -8,7 +8,7 @@ class Container
   def self.fleet(docker: Remora::Docker.new, hostname: Socket.gethostname)
     docker.containers
           .map { |attrs| new(attrs) }
-          .reject { |container| container.hosts?(hostname) }
+          .reject { |container| container.hosts?(hostname) || container.hidden? }
           .sort_by { |c| [ c.compose_project ? 0 : 1, c.compose_project.to_s, c.name ] }
   end
 
@@ -19,7 +19,9 @@ class Container
   def id = attrs["Id"]
   def short_id = id[0, 12]
   def name = attrs["Names"].to_a.first.to_s.delete_prefix("/")
-  def display_name = name
+  def display_name = labels["remora.name"].presence || compose_service.presence || name
+  def compose_service = labels["com.docker.compose.service"]
+  def hidden? = labels["remora.hide"] == "true"
   def image = attrs["Image"]
   def labels = attrs["Labels"] || {}
   def compose_project = labels["com.docker.compose.project"]
