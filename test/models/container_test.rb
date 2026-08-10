@@ -1,0 +1,72 @@
+require "test_helper"
+
+class ContainerTest < ActiveSupport::TestCase
+  test "name strips the leading slash from the docker name" do
+    assert_equal "vaultwarden", build_container("Names" => [ "/vaultwarden" ]).name
+  end
+
+  test "display_name falls back to the container name" do
+    assert_equal "vaultwarden", build_container("Names" => [ "/vaultwarden" ]).display_name
+  end
+
+  test "compose_project reads the compose label" do
+    container = build_container("Labels" => { "com.docker.compose.project" => "propertee" })
+    assert_equal "propertee", container.compose_project
+  end
+
+  test "compose_project is nil for standalone containers" do
+    assert_nil build_container.compose_project
+  end
+
+  test "state_kind maps engine states and health to display kinds" do
+    assert_equal :running, build_container("State" => "running", "Status" => "Up 3 days").state_kind
+    assert_equal :unhealthy, build_container("State" => "running", "Status" => "Up 3 days (unhealthy)").state_kind
+    assert_equal :restarting, build_container("State" => "restarting").state_kind
+    assert_equal :exited, build_container("State" => "exited", "Status" => "Exited (0) 2 hours ago").state_kind
+    assert_equal :exited, build_container("State" => "created").state_kind
+  end
+
+  test "status_text exposes the engine's human status" do
+    assert_equal "Up 3 days", build_container("Status" => "Up 3 days").status_text
+  end
+
+  test "dom_id is stable and based on the short id" do
+    assert_equal "container_abcdef123456", build_container("Id" => "abcdef123456" + "0" * 52).dom_id
+  end
+
+  test "fleet excludes the container remora itself runs in" do
+    docker = stub_docker([
+      { "Id" => "aaaa11112222" + "0" * 52, "Names" => [ "/remora" ] },
+      { "Id" => "bbbb33334444" + "0" * 52, "Names" => [ "/web" ] }
+    ])
+
+    fleet = Container.fleet(docker: docker, hostname: "aaaa11112222")
+
+    assert_equal [ "web" ], fleet.map(&:name)
+  end
+
+  test "fleet sorts by compose project then name, standalone containers last" do
+    docker = stub_docker([
+      { "Id" => "a" * 64, "Names" => [ "/zeta" ] },
+      { "Id" => "b" * 64, "Names" => [ "/db" ], "Labels" => { "com.docker.compose.project" => "propertee" } },
+      { "Id" => "c" * 64, "Names" => [ "/web" ], "Labels" => { "com.docker.compose.project" => "propertee" } },
+      { "Id" => "d" * 64, "Names" => [ "/api" ], "Labels" => { "com.docker.compose.project" => "acme" } }
+    ])
+
+    fleet = Container.fleet(docker: docker, hostname: "devbox")
+
+    assert_equal [ "api", "db", "web", "zeta" ], fleet.map(&:name)
+  end
+
+  private
+
+  def build_container(attrs = {})
+    Container.new({ "Id" => "f" * 64, "Names" => [ "/box" ], "State" => "running", "Status" => "Up 1 second", "Image" => "nginx:latest", "Labels" => {} }.merge(attrs))
+  end
+
+  def stub_docker(containers)
+    docker = Object.new
+    docker.define_singleton_method(:containers) { |all: true| containers }
+    docker
+  end
+end

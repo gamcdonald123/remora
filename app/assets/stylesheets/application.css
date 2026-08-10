@@ -1,10 +1,96 @@
-/*
- * This is a manifest file that'll be compiled into application.css.
- *
- * With Propshaft, assets are served efficiently without preprocessing steps. You can still include
- * application-wide styles in this file, but keep in mind that CSS precedence will follow the standard
- * cascading order, meaning styles declared later in the document or manifest will override earlier ones,
- * depending on specificity.
- *
- * Consider organizing styles into separate files for maintainability.
- */
+/* Utilitarian baseline — a proper design pass comes once the UI surface is complete. */
+
+:root {
+  --bg: #ffffff;
+  --fg: #1a1d21;
+  --fg-muted: #6b7280;
+  --row-border: #e5e7eb;
+  --ok: #22c55e;
+  --bad: #ef4444;
+  --warn: #f59e0b;
+  --idle: #9ca3af;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111417;
+    --fg: #e5e7eb;
+    --fg-muted: #9ca3af;
+    --row-border: #23272d;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+.app-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--row-border);
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+main {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 1rem 1.5rem 4rem;
+}
+
+.project h2 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg-muted);
+  margin: 1.5rem 0 0.25rem;
+}
+
+.container-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.25rem;
+  border-bottom: 1px solid var(--row-border);
+}
+
+.state-dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  flex: none;
+}
+
+.state-running   { background: var(--ok); }
+.state-unhealthy { background: var(--bad); }
+.state-restarting { background: var(--warn); }
+.state-exited    { background: var(--idle); }
+
+.container-name { font-weight: 600; }
+
+.container-image,
+.container-status {
+  color: var(--fg-muted);
+  font-size: 0.85rem;
+}
+
+.container-status { margin-left: auto; }
+
+.docker-unreachable {
+  margin-top: 3rem;
+  text-align: center;
+  color: var(--fg-muted);
+}
+
+.docker-unreachable code {
+  background: color-mix(in srgb, var(--fg) 8%, transparent);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+
+.error-detail { font-size: 0.8rem; }

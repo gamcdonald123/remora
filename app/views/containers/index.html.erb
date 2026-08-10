@@ -1,0 +1,19 @@
+<% if @docker_error %>
+  <div class="docker-unreachable">
+    <h2>Can't reach Docker</h2>
+    <p>Remora needs the Docker socket mounted at <code>/var/run/docker.sock</code>
+      (or pointed to by <code>DOCKER_SOCKET</code>).</p>
+    <p class="error-detail"><%= @docker_error %></p>
+  </div>
+<% else %>
+  <% @groups.each do |project, containers| %>
+    <section class="project" data-project="<%= project %>">
+      <% if project %>
+        <h2><%= project %></h2>
+      <% end %>
+      <div class="rows">
+        <%= render partial: "container", collection: containers %>
+      </div>
+    </section>
+  <% end %>
+<% end %>
