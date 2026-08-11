@@ -312,6 +312,15 @@ main {
   box-shadow: 0 0 10px rgba(86, 200, 255, 0.25);
 }
 
+.chip-repo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--faint);
+}
+
+.chip-repo svg { width: 11px; height: 11px; }
+
 /* ————— uptime strip: the sonar trace ————— */
 
 .uptime-strip {

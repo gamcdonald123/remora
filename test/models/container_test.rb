@@ -154,6 +154,17 @@ class ContainerTest < ActiveSupport::TestCase
     assert_nil sidecar_row.sidecar
   end
 
+  test "repo_url comes from the OCI source label" do
+    container = build_container("Labels" => { "org.opencontainers.image.source" => "https://github.com/dani-garcia/vaultwarden" })
+
+    assert_equal "https://github.com/dani-garcia/vaultwarden", container.repo_url
+  end
+
+  test "repo_url is nil when absent or not a web url" do
+    assert_nil build_container.repo_url
+    assert_nil build_container("Labels" => { "org.opencontainers.image.source" => "git@github.com:x/y.git" }).repo_url
+  end
+
   private
 
   def build_container(attrs = {})

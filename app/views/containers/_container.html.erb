@@ -26,6 +26,13 @@
         <% container.launch_links.each do |link| %>
           <%= launch_chip(link) %>
         <% end %>
+        <% if container.repo_url %>
+          <a class="chip chip-repo" href="<%= container.repo_url %>" target="_blank" rel="noreferrer"
+             title="<%= container.repo_url %>">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M11.5 3a1.5 1.5 0 1 0-2 1.415v.335a1.25 1.25 0 0 1-1.25 1.25h-2.5c-.45 0-.875.12-1.25.325V4.415a1.5 1.5 0 1 0-1 0v7.17a1.5 1.5 0 1 0 1 0V8.75c0-.69.56-1.25 1.25-1.25h2.5A2.25 2.25 0 0 0 10.5 5.25v-.835c.583-.206 1-.762 1-1.415Z"/></svg>
+            src
+          </a>
+        <% end %>
       </span>
       <span class="container-image"><%= container.image %></span>
       <%= uptime_strip(container.id) %>

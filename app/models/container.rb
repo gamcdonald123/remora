@@ -69,6 +69,13 @@ class Container
     mode.delete_prefix("container:") if mode.start_with?("container:")
   end
 
+  # Containers inherit image labels, so the standard OCI source label gives
+  # us the repo link for free on most modern images.
+  def repo_url
+    url = labels["org.opencontainers.image.source"].to_s
+    url if url.start_with?("https://", "http://")
+  end
+
   HTTPS_PORTS = [ 443, 8443 ].freeze
 
   # Launch targets: {url:} for explicit overrides, {port:, scheme:} for
