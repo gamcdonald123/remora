@@ -286,15 +286,16 @@ main {
 
 .stack.expanded .stack-chevron { transform: rotate(90deg); }
 
-/* members hide in the baseline — except the ones that are the problem */
-.stack:not(.expanded) .stack-members .container-row:not(.problem) { display: none; }
+/* members stay hidden until the stack is explicitly expanded — the stack
+   row's own state says whether anything needs a look */
+.stack:not(.expanded) .stack-members { display: none; }
 
 .stack-members .container-row {
   padding-left: 1.9rem;
   background: rgba(86, 200, 255, 0.02);
 }
 
-.stack:not(.expanded) .stack-members .container-row.problem {
+.stack-members .container-row.problem {
   border-left: 2px solid var(--amber);
 }
 
