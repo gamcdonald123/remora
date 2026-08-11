@@ -1,0 +1,23 @@
+<div id="<%= stack.dom_id %>" class="stack" data-controller="stack" data-stack-name-value="<%= stack.name %>">
+  <div class="container-row stack-row" role="button" tabindex="0" aria-expanded="false"
+       data-action="click->stack#toggle keydown.enter->stack#toggle">
+    <span class="state-dot state-<%= stack.state_kind %>"></span>
+    <span class="container-name"><%= stack.name %></span>
+    <span class="stack-count">× <%= stack.containers.size %></span>
+    <% if stack.tailscale? %>
+      <span class="badge badge-ts">ts</span>
+    <% end %>
+    <span class="container-chips">
+      <% stack.all_links.each do |link| %>
+        <%= launch_chip(link) %>
+      <% end %>
+    </span>
+    <span class="container-status stack-status-<%= stack.state_kind %>"><%= stack.status_text %></span>
+    <svg class="stack-chevron" viewBox="0 0 10 10" aria-hidden="true">
+      <path d="M3 2 L7 5 L3 8" fill="none" stroke="currentColor" stroke-width="1.4"/>
+    </svg>
+  </div>
+  <div class="stack-members">
+    <%= render partial: "containers/container", collection: stack.containers %>
+  </div>
+</div>

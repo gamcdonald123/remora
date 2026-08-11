@@ -265,6 +265,48 @@ main {
   border: 1px solid var(--faint);
 }
 
+/* ————— stacks: the rolled-up baseline ————— */
+
+.stack-row { cursor: pointer; user-select: none; }
+
+.stack-count {
+  color: var(--faint);
+  font-size: 0.7rem;
+  order: 1; /* after the name (ties resolve in DOM order) */
+}
+
+.stack-chevron {
+  width: 10px;
+  height: 10px;
+  flex: none;
+  color: var(--faint);
+  transition: transform 0.18s ease;
+  order: 9;
+}
+
+.stack.expanded .stack-chevron { transform: rotate(90deg); }
+
+/* members hide in the baseline — except the ones that are the problem */
+.stack:not(.expanded) .stack-members .container-row:not(.problem) { display: none; }
+
+.stack-members .container-row {
+  padding-left: 1.9rem;
+  background: rgba(86, 200, 255, 0.02);
+}
+
+.stack:not(.expanded) .stack-members .container-row.problem {
+  border-left: 2px solid var(--amber);
+}
+
+.stack-status-running   { color: var(--bio); }
+.stack-status-unhealthy { color: var(--red); }
+.stack-status-degraded  { color: var(--amber); }
+
+.state-degraded {
+  background: var(--amber);
+  box-shadow: 0 0 6px 1px rgba(255, 180, 84, 0.45);
+}
+
 /* ————— row content ————— */
 
 .container-name { font-weight: 700; }
@@ -661,6 +703,30 @@ main {
     font-size: 0.7rem;
     border-color: var(--hairline);
   }
+
+  /* stack rows have no row-main wrapper — lay them out as a wrapping line:
+     dot · name · count · badges … status · chevron, chips beneath */
+  .stack-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.6rem;
+    padding: 0.9rem 0.4rem;
+  }
+
+  .stack-row .state-dot { margin-top: 0; }
+
+  .stack-row .container-status {
+    flex-basis: auto;
+    margin-left: auto;
+  }
+
+  .stack-row .container-chips {
+    flex-basis: 100%;
+    order: 10;
+  }
+
+  .stack-row .container-chips:empty { display: none; }
 
   /* drawer becomes a full-screen sheet rising from the deep */
   .drawer {

@@ -99,4 +99,15 @@ class Container
     else :exited
     end
   end
+
+  def stack? = false
+
+  # A member worth surfacing even in the rolled-up baseline view.
+  def problem? = state_kind != :running || Event.flapping?(id)
+
+  # Tailnet URLs (when behind a sidecar) followed by published-port links.
+  def all_links
+    ts = tailscale? ? Remora::Tailscale.links_for((sidecar || self).id) : []
+    ts + launch_links
+  end
 end

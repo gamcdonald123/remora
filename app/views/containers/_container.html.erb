@@ -1,4 +1,4 @@
-<div id="<%= container.dom_id %>" class="container-row">
+<div id="<%= container.dom_id %>" class="container-row <%= "problem" if container.problem? %>">
   <span class="state-dot state-<%= container.state_kind %>" title="<%= container.attrs["State"] %>"></span>
   <div class="row-main">
     <div class="row-title">
@@ -18,12 +18,7 @@
     </div>
     <div class="row-meta">
       <span class="container-chips">
-        <% if container.tailscale? %>
-          <% Remora::Tailscale.links_for((container.sidecar || container).id).each do |link| %>
-            <%= launch_chip(link) %>
-          <% end %>
-        <% end %>
-        <% container.launch_links.each do |link| %>
+        <% container.all_links.each do |link| %>
           <%= launch_chip(link) %>
         <% end %>
         <% if container.repo_url %>

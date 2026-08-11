@@ -7,5 +7,5 @@
   </div>
 <% else %>
   <%= turbo_stream_from "fleet" %>
-  <%= render "fleet", groups: @groups %>
+  <%= render "fleet", fleet: @fleet %>
 <% end %>

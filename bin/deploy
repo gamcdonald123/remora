@@ -5,7 +5,7 @@
 set -euo pipefail
 
 HOST="${1:-guys-nas}"
-URL="${REMORA_URL:-http://guys-nas:8321}"
+URL="${REMORA_URL:-https://remora.tawny-everest.ts.net}"
 
 # tar over ssh rather than rsync: macOS openrsync and the NAS's rsync 3.4
 # don't talk to each other. The tree is a few MB — full sync is fine.
@@ -28,7 +28,8 @@ EOF
 
 printf "→ waiting for health"
 for _ in $(seq 1 30); do
-  if [ "$(curl -s -o /dev/null -w '%{http_code}' "$URL/up")" = "200" ]; then
+  # Checked from inside the container: works regardless of network topology.
+  if ssh "$HOST" 'docker exec remora curl -fsS -o /dev/null localhost:8080/up' 2>/dev/null; then
     printf "\n✓ live at %s\n" "$URL"
     exit 0
   fi
