@@ -3,6 +3,7 @@
   <head>
     <title><%= content_for(:title) || "Remora" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="#04070c">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Remora">
     <meta name="mobile-web-app-capable" content="yes">
@@ -25,7 +26,15 @@
 
   <body>
     <header class="app-header">
-      <h1>Remora</h1>
+      <h1>
+        <svg class="fish" viewBox="0 0 30 15" fill="currentColor" aria-hidden="true">
+          <path d="M1.5 7.5 C5 3.5, 11 2.2, 17 4.2 L27.5 1.5 L24.5 7.5 L27.5 13.5 L17 10.8 C11 12.8, 5 11.5, 1.5 7.5 Z"/>
+          <circle cx="5.2" cy="6.6" r="0.9" fill="#04070c"/>
+          <path d="M6.5 4.6 L12 3.9 M6.8 5.8 L12.5 5.2" stroke="#04070c" stroke-width="0.7" fill="none"/>
+        </svg>
+        Remora
+      </h1>
+      <p class="app-sub">the sidecar fish</p>
     </header>
     <main>
       <%= yield %>
