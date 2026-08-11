@@ -1,30 +1,36 @@
 <div id="<%= container.dom_id %>" class="container-row">
   <span class="state-dot state-<%= container.state_kind %>" title="<%= container.attrs["State"] %>"></span>
-  <span class="container-name">
-    <%= link_to container.display_name, logs_container_path(container.short_id),
-          data: { turbo_frame: "drawer" }, class: "logs-link" %>
-  </span>
-  <% if container.tailscale? %>
-    <span class="badge badge-ts" title="<%= container.sidecar ? "behind Tailscale sidecar #{container.sidecar.name}" : "Tailscale" %>">ts</span>
-  <% end %>
-  <span class="container-chips">
-    <% if container.tailscale? %>
-      <% Remora::Tailscale.links_for((container.sidecar || container).id).each do |link| %>
-        <%= launch_chip(link) %>
+  <div class="row-main">
+    <div class="row-title">
+      <span class="container-name">
+        <%= link_to container.display_name, logs_container_path(container.short_id),
+              data: { turbo_frame: "drawer" }, class: "logs-link" %>
+      </span>
+      <% if container.tailscale? %>
+        <span class="badge badge-ts" title="<%= container.sidecar ? "behind Tailscale sidecar #{container.sidecar.name}" : "Tailscale" %>">ts</span>
       <% end %>
-    <% end %>
-    <% container.launch_links.each do |link| %>
-      <%= launch_chip(link) %>
-    <% end %>
-  </span>
-  <span class="container-image"><%= container.image %></span>
-  <%= uptime_strip(container.id) %>
-  <% if Event.flapping?(container.id) %>
-    <span class="badge badge-flapping" title="3+ exits within 10 minutes">flapping</span>
-  <% elsif (exits = Event.exit_count(container.id)).positive? %>
-    <span class="badge badge-exits" title="exits in the last 24h">↻ <%= exits %></span>
-  <% end %>
-  <span class="container-status"><%= container.status_text %></span>
+      <% if Event.flapping?(container.id) %>
+        <span class="badge badge-flapping" title="3+ exits within 10 minutes">flapping</span>
+      <% elsif (exits = Event.exit_count(container.id)).positive? %>
+        <span class="badge badge-exits" title="exits in the last 24h">↻ <%= exits %></span>
+      <% end %>
+      <span class="container-status"><%= container.status_text %></span>
+    </div>
+    <div class="row-meta">
+      <span class="container-chips">
+        <% if container.tailscale? %>
+          <% Remora::Tailscale.links_for((container.sidecar || container).id).each do |link| %>
+            <%= launch_chip(link) %>
+          <% end %>
+        <% end %>
+        <% container.launch_links.each do |link| %>
+          <%= launch_chip(link) %>
+        <% end %>
+      </span>
+      <span class="container-image"><%= container.image %></span>
+      <%= uptime_strip(container.id) %>
+    </div>
+  </div>
   <span class="container-actions">
     <% if container.state_kind == :exited %>
       <%= button_to "start", start_container_path(container.short_id), class: "action-button" %>

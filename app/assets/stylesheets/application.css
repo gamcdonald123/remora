@@ -60,7 +60,10 @@
   --mono: "Space Mono", ui-monospace, "SF Mono", Menlo, monospace;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
 
 html { height: 100%; }
 
@@ -101,12 +104,19 @@ a { color: var(--cyan); }
 /* ————— header ————— */
 
 .app-header {
+  position: sticky;
+  top: 0;
+  z-index: 15;
   display: flex;
   align-items: baseline;
   gap: 1rem;
   padding: 1.1rem 1.6rem 1rem;
+  padding-left: max(1.6rem, env(safe-area-inset-left));
+  padding-right: max(1.6rem, env(safe-area-inset-right));
   border-bottom: 1px solid var(--hairline);
-  background: linear-gradient(to bottom, rgba(12, 29, 44, 0.5), transparent);
+  background: rgba(4, 7, 12, 0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 .app-header h1 {
@@ -184,6 +194,21 @@ main {
   opacity: 0;
   animation: surface 0.35s ease forwards;
 }
+
+/* On wide screens the row groups dissolve into one instrument line;
+   `order` reassembles the reading sequence. */
+.row-main, .row-title, .row-meta { display: contents; }
+
+.state-dot          { order: 0; }
+.container-name     { order: 1; min-width: 0; }
+.badge-ts           { order: 2; }
+.container-chips    { order: 3; }
+.container-image    { order: 4; }
+.uptime-strip       { order: 5; }
+.badge-flapping,
+.badge-exits        { order: 6; }
+.container-status   { order: 7; }
+.container-actions  { order: 8; }
 
 .container-row:hover { background: rgba(86, 200, 255, 0.04); }
 
@@ -535,13 +560,151 @@ main {
 
 .error-detail { font-size: 0.72rem; color: var(--faint); }
 
-/* ————— small screens ————— */
+/* ————— touch ergonomics ————— */
 
-@media (max-width: 640px) {
-  .container-row { flex-wrap: wrap; row-gap: 0.3rem; }
+.action-button:active { transform: scale(0.96); }
+.chip:active { transform: scale(0.96); }
+
+@media (pointer: coarse) {
+  .chip {
+    padding: 0.4rem 0.85rem;
+    font-size: 0.75rem;
+  }
+  .logs-link { display: inline-block; padding: 0.2rem 0; }
+  .drawer-close { padding: 0.4rem 0.7rem; margin-right: -0.4rem; }
+  .drawer-tool { padding: 0.5rem 0.2rem; }
+}
+
+/* ————— small screens: the pocket instrument ————— */
+
+@media (max-width: 700px) {
+  body { font-size: 14px; }
+
+  .app-header {
+    padding: 0.8rem 1.1rem 0.7rem;
+    padding-left: max(1.1rem, env(safe-area-inset-left));
+    padding-right: max(1.1rem, env(safe-area-inset-right));
+  }
+
+  .app-header h1 { font-size: 1.45rem; }
+  .app-sub { display: none; }
+
+  main {
+    padding: 0.6rem 1.1rem 5rem;
+    padding-left: max(1.1rem, env(safe-area-inset-left));
+    padding-right: max(1.1rem, env(safe-area-inset-right));
+  }
+
+  .project h2 { margin-top: 1.6rem; }
+
+  /* rows become two-deck cards: identity above, instruments below,
+     actions docked right */
+  .container-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    column-gap: 0.7rem;
+    align-items: start;
+    padding: 0.8rem 0.4rem;
+    margin: 0 -0.4rem;
+  }
+
+  .state-dot { margin-top: 0.5rem; }
+
+  .row-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+
+  .row-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .container-status {
+    flex-basis: 100%;
+    margin-left: 0;
+  }
+
+  .row-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .row-meta:not(:has(.chip)):not(:has(.uptime-strip)) { display: none; }
+
   .container-image { display: none; }
-  .container-status { margin-left: 1.2rem; }
-  .uptime-strip { order: 5; }
+
+  .container-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .action-button {
+    min-height: 40px;
+    min-width: 4.2rem;
+    font-size: 0.7rem;
+    border-color: var(--hairline);
+  }
+
+  /* drawer becomes a full-screen sheet rising from the deep */
+  .drawer {
+    width: 100vw;
+    border-left: none;
+    animation: drawer-up 0.28s cubic-bezier(0.2, 0.8, 0.3, 1);
+  }
+
+  .drawer-header {
+    flex-wrap: wrap;
+    row-gap: 0.6rem;
+    padding: 0.8rem 1rem;
+    padding-top: max(0.8rem, env(safe-area-inset-top));
+  }
+
+  .drawer-header h2 { order: 1; flex: 1 1 auto; }
+  .drawer-close { order: 2; font-size: 1.5rem; }
+
+  .log-search {
+    order: 3;
+    flex: 1 1 10rem;
+    min-height: 42px;
+    font-size: 0.85rem;
+  }
+
+  .log-search-count { order: 4; }
+
+  .drawer-tools {
+    order: 5;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .drawer-tool { font-size: 0.78rem; }
+
+  .log-lines {
+    font-size: 0.7rem;
+    overscroll-behavior: contain;
+    padding-bottom: calc(1.2rem + env(safe-area-inset-bottom));
+  }
+
+  #toasts {
+    left: 1rem;
+    right: 1rem;
+    bottom: calc(1rem + env(safe-area-inset-bottom));
+  }
+
+  .toast { max-width: none; }
+}
+
+@keyframes drawer-up {
+  from { transform: translateY(28px); opacity: 0; }
+  to   { transform: none; opacity: 1; }
 }
 
 /* ————— stillness for those who ask ————— */
