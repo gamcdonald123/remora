@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Fast dev deploy: rsync the working tree to the NAS and build natively
+# there (x86_64, warm layer cache) — no commit, no CI, no registry.
+# Releases still go through tags -> GitHub Actions -> GHCR.
+set -euo pipefail
+
+HOST="${1:-guys-nas}"
+URL="${REMORA_URL:-http://guys-nas:8321}"
+
+# tar over ssh rather than rsync: macOS openrsync and the NAS's rsync 3.4
+# don't talk to each other. The tree is a few MB — full sync is fine.
+echo "→ syncing working tree to $HOST:~/remora/src"
+tar czf - \
+  --exclude ./.git --exclude ./tmp --exclude ./log --exclude ./storage \
+  . | ssh "$HOST" 'rm -rf ~/remora/src && mkdir -p ~/remora/src && tar xzf - -C ~/remora/src'
+
+echo "→ building and restarting on $HOST"
+ssh "$HOST" '
+  cd ~/remora
+  [ -f compose.dev.yaml ] || cat > compose.dev.yaml <<EOF
+# Dev override used by bin/deploy: build from the synced tree, not GHCR.
+services:
+  remora:
+    image: remora:dev
+    build: ./src
+EOF
+  docker compose -f compose.yaml -f compose.dev.yaml up -d --build --quiet-pull' 2>&1 | tail -2
+
+printf "→ waiting for health"
+for _ in $(seq 1 30); do
+  if [ "$(curl -s -o /dev/null -w '%{http_code}' "$URL/up")" = "200" ]; then
+    printf "\n✓ live at %s\n" "$URL"
+    exit 0
+  fi
+  printf "."
+  sleep 2
+done
+
+printf "\n✗ %s/up never came healthy — check: ssh %s 'cd ~/remora && docker compose logs --tail 50'\n" "$URL" "$HOST"
+exit 1
