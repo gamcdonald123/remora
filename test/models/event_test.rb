@@ -79,6 +79,18 @@ class EventTest < ActiveSupport::TestCase
     assert_equal 1, Event.exit_count(id)
   end
 
+  test "timeline_for treats probe transitions as service up/down" do
+    now = Time.zone.parse("2026-08-12 12:00")
+    id = "p" * 64
+    Event.create!(docker_id: id, kind: "start", occurred_at: now - 10.hours)
+    Event.create!(docker_id: id, kind: "probe_down", occurred_at: now - 4.hours)
+    Event.create!(docker_id: id, kind: "probe_up", occurred_at: now - 1.hour)
+
+    segments = Event.timeline_for(id, window: 24.hours, now: now)
+
+    assert_equal %i[unknown up down up], segments.map { |s| s[:state] }
+  end
+
   test "prune! removes only events older than 30 days" do
     old = Event.create!(docker_id: "x", kind: "start", occurred_at: 31.days.ago)
     fresh = Event.create!(docker_id: "x", kind: "die", occurred_at: 1.day.ago)

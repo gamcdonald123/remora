@@ -36,20 +36,24 @@ class Event < ApplicationRecord
     nano ? Time.zone.at(Rational(nano, 1_000_000_000)) : Time.current
   end
 
+  # Process transitions — what the reconciler compares against engine state.
   STATE_CHANGING = %w[start die oom].freeze
+  # The strip also reflects service reachability from the prober.
+  TIMELINE_KINDS = (STATE_CHANGING + %w[probe_up probe_down]).freeze
+  UP_KINDS = %w[start probe_up].freeze
 
   # Up/down/unknown segments covering the window, oldest first, for the strip.
   def self.timeline_for(docker_id, window: 24.hours, now: Time.current)
     from = now - window
-    prior = where(docker_id: docker_id, kind: STATE_CHANGING)
+    prior = where(docker_id: docker_id, kind: TIMELINE_KINDS)
               .where(occurred_at: ...from).order(:occurred_at).last
-    state = prior.nil? ? :unknown : (prior.kind == "start" ? :up : :down)
+    state = prior.nil? ? :unknown : (UP_KINDS.include?(prior.kind) ? :up : :down)
 
     segments = []
     cursor = from
-    where(docker_id: docker_id, kind: STATE_CHANGING, occurred_at: from..now)
+    where(docker_id: docker_id, kind: TIMELINE_KINDS, occurred_at: from..now)
       .order(:occurred_at).each do |event|
-      new_state = event.kind == "start" ? :up : :down
+      new_state = UP_KINDS.include?(event.kind) ? :up : :down
       next if new_state == state
 
       segments << { state: state, from: cursor, to: event.occurred_at }

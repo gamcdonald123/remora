@@ -102,8 +102,30 @@ class Container
 
   def stack? = false
 
+  # Running, but its probed URL stopped answering.
+  def unreachable? = state_kind == :running && Remora::Probes.down?(id)
+
   # A member worth surfacing even in the rolled-up baseline view.
-  def problem? = state_kind != :running || Event.flapping?(id)
+  def problem? = state_kind != :running || unreachable? || Event.flapping?(id)
+
+  # What the prober checks — up means ANY of these answers, so a non-HTTP
+  # sync port next to a web UI doesn't false-alarm. The remora.probe label
+  # overrides: "false" opts out, "/path" appends to the primary URL, a full
+  # URL replaces everything.
+  def probe_urls
+    label = labels["remora.probe"].presence
+    return [] if label == "false"
+    return [ label ] if label&.start_with?("http")
+
+    urls = all_links.map { |link| link_url(link) }
+    return [] if urls.empty?
+
+    label ? [ urls.first.chomp("/") + label ] : urls
+  end
+
+  def link_url(link)
+    link[:url] || "#{link[:scheme]}://#{Remora::Probes.probe_host}:#{link[:port]}"
+  end
 
   # Tailnet URLs (when behind a sidecar) followed by published-port links.
   def all_links

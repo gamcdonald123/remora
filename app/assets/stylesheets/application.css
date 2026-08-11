@@ -404,6 +404,12 @@ main {
   animation: distress 1.1s ease-in-out infinite;
 }
 
+.badge-noresponse {
+  color: var(--red);
+  background: rgba(255, 92, 104, 0.1);
+  border: 1px solid rgba(255, 92, 104, 0.3);
+}
+
 .badge-exits {
   color: var(--amber);
   background: rgba(255, 180, 84, 0.08);

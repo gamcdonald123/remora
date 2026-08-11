@@ -14,6 +14,7 @@ Install it on any host and immediately see, control, launch, and monitor every c
 - **Launch chips** — published ports become clickable links, correct whether you browse via tailnet, LAN name, or IP
 - **Tailscale awareness** — a `tailscale/tailscale` sidecar sharing an app's network namespace folds into one row, and its `tailscale serve` config becomes an `https://app.your-tailnet.ts.net` chip
 - **Uptime strips** — 24h up/down history per container from the Docker event stream, with flapping detection
+- **HTTP health probes** — every running container's discovered URLs are checked from outside each minute; a service that's up-but-not-answering gets a "no response" badge, degrades its stack, and marks the strip — no monitor configuration, ever
 
 ## Install
 
@@ -47,6 +48,7 @@ There is no settings screen and no config file — that's the point. The three t
 | `remora.hide: "true"` | Exclude a container from the dashboard |
 | `remora.name: "Immich"` | Display-name override (default: compose service name, else container name) |
 | `remora.url: "https://immich.example.ts.net"` | Launch-link override; replaces all derived links |
+| `remora.probe: "false"` / `"/health"` / a URL | Opt out of HTTP probing, probe a specific path, or probe an explicit URL |
 
 Environment variables on Remora itself (all optional): `TZ`, `DOCKER_SOCKET` (socket path override), `REMORA_HOST_URL` (base URL for port links when the browser's hostname isn't right).
 

@@ -9,6 +9,9 @@
       <% if container.tailscale? %>
         <span class="badge badge-ts" title="<%= container.sidecar ? "behind Tailscale sidecar #{container.sidecar.name}" : "Tailscale" %>">ts</span>
       <% end %>
+      <% if container.unreachable? %>
+        <span class="badge badge-noresponse" title="running, but its URL isn't answering">no response</span>
+      <% end %>
       <% if Event.flapping?(container.id) %>
         <span class="badge badge-flapping" title="3+ exits within 10 minutes">flapping</span>
       <% elsif (exits = Event.exit_count(container.id)).positive? %>

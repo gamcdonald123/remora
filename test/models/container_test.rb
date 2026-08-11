@@ -154,6 +154,23 @@ class ContainerTest < ActiveSupport::TestCase
     assert_nil sidecar_row.sidecar
   end
 
+  test "probe_urls: label overrides layered over discovered links" do
+    ENV["REMORA_PROBE_HOST"] = "probehost"
+    ports = [ { "PrivatePort" => 80, "PublicPort" => 8080, "Type" => "tcp", "IP" => "0.0.0.0" },
+              { "PrivatePort" => 22000, "PublicPort" => 22000, "Type" => "tcp", "IP" => "0.0.0.0" } ]
+
+    assert_equal [ "http://probehost:8080", "http://probehost:22000" ],
+                 build_container("Ports" => ports).probe_urls
+    assert_empty build_container("Ports" => ports, "Labels" => { "remora.probe" => "false" }).probe_urls
+    assert_equal [ "http://probehost:8080/health" ],
+                 build_container("Ports" => ports, "Labels" => { "remora.probe" => "/health" }).probe_urls
+    assert_equal [ "https://x.example/ping" ],
+                 build_container("Labels" => { "remora.probe" => "https://x.example/ping" }).probe_urls
+    assert_empty build_container.probe_urls
+  ensure
+    ENV.delete("REMORA_PROBE_HOST")
+  end
+
   test "repo_url comes from the OCI source label" do
     container = build_container("Labels" => { "org.opencontainers.image.source" => "https://github.com/dani-garcia/vaultwarden" })
 

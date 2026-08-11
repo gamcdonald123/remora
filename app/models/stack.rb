@@ -42,7 +42,9 @@ class Stack
     when :unhealthy then "unhealthy"
     else
       down = containers.count { |c| c.state_kind == :exited }
-      down.positive? ? "#{down} of #{containers.size} down" : "flapping"
+      return "#{down} of #{containers.size} down" if down.positive?
+
+      containers.any?(&:unreachable?) ? "not responding" : "flapping"
     end
   end
 

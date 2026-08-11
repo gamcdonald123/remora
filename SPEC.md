@@ -127,15 +127,16 @@ For ordinary `-p` published ports, the link is `http(s)://<browser Host header, 
 
 ## 7. Label schema
 
-Exactly three labels, namespace `remora.`:
+Exactly four labels, namespace `remora.`:
 
 | Label | Effect |
 |---|---|
 | `remora.hide: "true"` | Exclude container from the dashboard |
 | `remora.name: "Immich"` | Display-name override (default: compose service name, else container name) |
 | `remora.url: "https://immich.example.ts.net"` | Launch-link override; replaces all derived links |
+| `remora.probe: "false" \| "/health" \| url` | Opt out of HTTP probing, probe a specific path, or probe an explicit URL |
 
-Any need that can't be met by these three gets designed as discovery, not as a fourth label — additions require a very good reason.
+Any further need gets designed as discovery, not as a fifth label — additions require a very good reason.
 
 ## 8. Architecture (Rails)
 
